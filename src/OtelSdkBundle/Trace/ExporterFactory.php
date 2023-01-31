@@ -7,6 +7,7 @@ namespace OpenTelemetry\Symfony\OtelSdkBundle\Trace;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\Psr17FactoryDiscovery;
 use OpenTelemetry\SDK\Trace\SpanExporterInterface;
+use OpenTelemetry\SDK\Common\Export\Http\PsrTransportFactory;
 use OpenTelemetry\Symfony\OtelSdkBundle\Factory;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -31,7 +32,14 @@ class ExporterFactory implements Factory\GenericFactoryInterface
     public function build(array $options = []): SpanExporterInterface
     {
         try {
+            // workaround Configuration being out of step with reality
+            if (isset($options['url']) && !isset($options['transport'])) {
+                $options['transport'] = PsrTransportFactory::discover()->create($options['url'], 'application/json');
+                unset($options['url']);
+            }
+
             $res = $this->doBuild($options);
+
             if (!$res instanceof SpanExporterInterface) {
                 throw new RuntimeException(
                     sprintf('Built object is not an instance of %s', SpanExporterInterface::class)
