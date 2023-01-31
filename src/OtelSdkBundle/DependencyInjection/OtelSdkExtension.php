@@ -687,10 +687,12 @@ class OtelSdkExtension extends Extension implements LoggerAwareInterface
      */
     private function validateId(string $id): void
     {
+
         if (!$this->getContainer()->has($id)) {
-            throw new RuntimeException(
-                sprintf('Service "%s" is not registered.', $id)
-            );
+//add compiler pass validation
+//            throw new RuntimeException(
+//                sprintf('Service "%s" is not registered.', $id)
+//            );
         }
     }
 
